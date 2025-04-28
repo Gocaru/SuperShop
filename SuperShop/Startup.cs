@@ -1,10 +1,5 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -25,11 +20,14 @@ namespace SuperShop
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            //Configuo o meu Data Context
+            //Configuro o meu Data Context
             services.AddDbContext<DataContext>(cfg =>           //Crio um serviço de DataContext e injeto lá o meu DataContext
             {
                 cfg.UseSqlServer(this.Configuration.GetConnectionString("DefaultConnection"));      //Estipulo que tipo de base de dados o meu serviço vai utilizar ("UseSqlServer")  e indico a connection string ("GetConnectionString("DefaultConnection")")
-            });                                        
+            });
+
+            services.AddTransient<SeedDb>();    //"Quando alguém perguntar pelo SeedDb, tu vais criá-lo". Este service é usado uma única vez (usa, deita fora e o objeto desaparece e não pode ser mais usado). Neste caso só é usado quando a aplicação arranca.
+
             services.AddControllersWithViews();
         }
 
