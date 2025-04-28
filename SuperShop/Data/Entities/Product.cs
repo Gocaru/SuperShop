@@ -9,6 +9,8 @@ namespace SuperShop.Data.Entities
         //[Key]      //Tb poderia fazer uma Data Anotation ("[Key]") para indicar que o campo vai ser chave primária
         public int Id { get; set; }  //Por defeito deteta que é a chave primária pois é "Id"
 
+        [Required]  //Torna o campo obrigatório de preenchimmento
+        [MaxLength(50, ErrorMessage ="The filed {0} can contain {1} characters length")]  //O campo "Name" só pode conter 50 caracteres
         public string Name { get; set; }
 
 
@@ -20,12 +22,13 @@ namespace SuperShop.Data.Entities
         [Display(Name = "Image")]     //Faço esta Data Anotation para aparecer na webpage, como campo, "Image" e não "ImageUrl"
         public string ImageUrl { get; set; }  //Link da imagem
 
+
         [Display(Name = "Last Purchase")]
-        public DateTime LastPurchase { get; set; }
+        public DateTime? LastPurchase { get; set; } //Torno o DateTime opcional (coloquei um ponto de interrogação)
 
 
         [Display(Name = "Last Sale")]
-        public DateTime LastSale { get; set; }
+        public DateTime? LastSale { get; set; }   //Torno o DateTime opcional (coloquei um ponto de interrogação)
 
         [Display(Name = "Is Available")]
         public bool IsAvailable { get; set; }
