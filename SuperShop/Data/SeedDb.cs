@@ -1,7 +1,6 @@
-﻿using Microsoft.AspNetCore.Identity;
-using SuperShop.Data.Entities;
-using System;
+﻿using System;
 using System.Linq;
+using SuperShop.Data.Entities;
 using System.Threading.Tasks;
 
 namespace SuperShop.Data
@@ -23,7 +22,7 @@ namespace SuperShop.Data
             await _context.Database.EnsureCreatedAsync();   //Vê se a Base de Dados está criada (se não estiver criada, cria-a)
 
             //Cria os produtos
-            if(!_context.Products.Any())    //Se não tem lá produtos
+            if (!_context.Products.Any())    //Se não tem lá produtos
             {
                 AddProduct("IPhone X");
                 AddProduct("Magic Mouse");
