@@ -3,8 +3,10 @@ using System.ComponentModel.DataAnnotations;
 
 namespace SuperShop.Data.Entities
 {
-    //Vai dar origem a uma tabela na Base de dados:
-    public class Product
+    /// <summary>
+    /// Representa um produto no sistema da loja. Esta classe corresponde a uma tabela na base de dados.
+    /// </summary>
+    public class Product : IEntity  //Implementa IEntity (possui uma chave primária chamada "Id")
     {
         //[Key]      //Tb poderia fazer uma Data Anotation ("[Key]") para indicar que o campo vai ser chave primária
         public int Id { get; set; }  //Por defeito deteta que é a chave primária pois é "Id"
