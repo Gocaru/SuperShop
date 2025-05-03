@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SuperShop.Data;
 using SuperShop.Data.Entities;
+using SuperShop.Helpers;
 
 namespace SuperShop.Controllers
 {
@@ -24,10 +25,19 @@ namespace SuperShop.Controllers
         //}
 
         private readonly IProductRepository _productRepository;
+        private readonly IUserHelper _userHelper;
 
-        public ProductsController(IProductRepository productrepository)
+        //public ProductsController(IProductRepository productrepository)
+        //{
+        //    _productRepository = productrepository;
+        //}
+
+        public ProductsController(
+            IProductRepository productRepository,
+            IUserHelper userHelper) //Injeto o IUserHelper
         {
-            _productRepository = productrepository;
+            _productRepository = productRepository;
+            _userHelper = userHelper;
         }
 
         ////Eu não quero isto. Não quero que o controlador tenha acesso direto à tabela.
@@ -49,7 +59,8 @@ namespace SuperShop.Controllers
         // GET: Products
         public IActionResult Index()
         {
-            return View(_productRepository.GetAll());
+            return View(_productRepository.GetAll().OrderBy(p => p.Name));  //Aqui é o único sítio que posso ordenar pelo nome, pois pode haver entidades que não rpecisem de "Name" como propreidade
+                                                                            //(se todas precisassem, deveria colocar no IEntity)
         }
 
         //// GET: Products/Details/5
@@ -158,8 +169,16 @@ namespace SuperShop.Controllers
         {
             if (ModelState.IsValid)
             {
-                await _productRepository.CreateAsync(product);
-                //await _productRepository.SaveAllAsync();  //Não preciso de gravar diretamente no controlador pois no GenericRepository, o método "CreateAsync" já chama o método "SaveAllAsync"
+                //ToDo: Modificar para o user que tiver logado
+                product.User = await _userHelper.GetUserByEmailAsync("goncalorusso@gmail.com");
+                await _productRepository.CreateAsync(product);  //Chama o método "CreateAsync" do repositório para adicionar o objeto "product" à base de dados.
+                                                                //Este método está implementado no "GenericRepository<Product>", herdado por "ProductRepository".
+                                                                //O produto é tratado como uma entidade genérica "T" e adicionado ao contexto através de "AddAsync" (EF Core).
+                                                                //A gravação é concluída dentro do próprio método "CreateAsync", que invoca "SaveAllAsync",
+                                                                //pelo que não é necessário gravar manualmente no controlador.
+
+
+                //await _productRepository.SaveAllAsync();  //Não é necessário chamar este método no controlador, pois já é executado dentro de "CreateAsync".
                 return RedirectToAction(nameof(Index));
             }
             return View(product);
@@ -317,6 +336,8 @@ namespace SuperShop.Controllers
             {
                 try
                 {
+                    //ToDo: Modificar para o user que tiver logado
+                    product.User = await _userHelper.GetUserByEmailAsync("goncalorusso@gmail.com"); // Garante que, ao atualizar o produto, o campo User associado ao mesmo não fica nulo e está corretamente ligado a um utilizador existente.
                     await _productRepository.UpdateAsync(product);   //Faço o update do produto utilizando o método "UpdateAsync()"
                 }
                 catch (DbUpdateConcurrencyException)

@@ -38,6 +38,7 @@ namespace SuperShop.Data.Entities
         [DisplayFormat(DataFormatString = "{0:N2}", ApplyFormatInEditMode = false)]
         public double Stock { get; set; }
 
-
+        //O meu produto tb vai ter de ter uma propriedade que é o "User" (pois quero saber o utilizador que inseriu um determinado produto)
+        public User User { get; set; }  //Cria uma relação de um para muitos (1 user pode ter muitos produtos, mas um produto só pode ter 1 user)
     }
 }

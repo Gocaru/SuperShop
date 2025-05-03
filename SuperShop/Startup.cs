@@ -1,10 +1,13 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using SuperShop.Data;
+using SuperShop.Data.Entities;
+using SuperShop.Helpers;
 
 namespace SuperShop
 {
@@ -20,6 +23,18 @@ namespace SuperShop
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddIdentity<User, IdentityRole>(cfg =>
+            {
+                cfg.User.RequireUniqueEmail = true; //Para cada user o email deve ser único (não pode haver emails repetidos)
+                cfg.Password.RequireDigit = false;  //Coloquei estes campos de password false para facilitar a criação de users e a testagem. Quando estiver em produção tenho de colocar true (para não ficar inseguro)
+                cfg.Password.RequiredUniqueChars = 0;
+                cfg.Password.RequireLowercase = false;
+                cfg.Password.RequireUppercase = false;
+                cfg.Password.RequireNonAlphanumeric = false;
+                cfg.Password.RequiredLength = 6;
+            })
+                .AddEntityFrameworkStores<DataContext>();   //Depois do user fazer o login, passa a usar o DataContext simples
+
             //Configuro o meu Data Context
             services.AddDbContext<DataContext>(cfg =>           //Crio um serviço de DataContext e injeto lá o meu DataContext
             {
@@ -29,6 +44,8 @@ namespace SuperShop
             services.AddTransient<SeedDb>();    //"Quando alguém perguntar pelo SeedDb, tu vais criá-lo".
                                                 //Este service é usado uma única vez (usa, deita fora e o objeto desaparece e não pode ser mais usado).
                                                 //Neste caso só é usado quando a aplicação arranca.
+
+            services.AddScoped<IUserHelper, UserHelper>();
 
             //services.AddScoped<IRepository, Repository>();  //Quando for preciso, vai compilar o interface do repositório e quando for necessário vai ser instanciado (injeto a classe "Repository")
             //                                                //Assim que detetar que é preciso o repositório, vai instanciá-lo
@@ -62,6 +79,7 @@ namespace SuperShop
 
             app.UseRouting();
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>

@@ -9,7 +9,7 @@ namespace SuperShop.Data
     /// <summary>
     /// Implementa um repositório genérico para aceder a entidades do tipo "T"
     /// </summary>
-    /// <typeparam name="T">A entidade a ser gerida pelo repositório, que deve ser uma classe que implementa "IEntity"</typeparam>
+    /// <typeparam name="T">A entidade a ser gerida pelo repositório, que deve ser uma classe que implementa IEntity"</typeparam>
     public class GenericRepository<T> : IGenericRepository<T> where T : class, IEntity //No "GenericRepository" vou implementar o Interface genérico ("IGenericRepository")
                                                                                        //Restringe o tipo "T" para ser uma classe que implementa "IEntity".
     {

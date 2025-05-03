@@ -1,9 +1,13 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using SuperShop.Data.Entities;
 
 namespace SuperShop.Data
 {
-    public class DataContext : DbContext
+    //public class DataContext : DbContext
+    public class DataContext : IdentityDbContext<User>    //Porque agora tenho utilizadores, e em consequência vou precisar de um sistema de autenticação,
+                                                          //o DataContext vai herdar do IdentityDbContext (responsável pela autenticação).
+                                                          //Injeto o meu "User" para saber que vai receber um objeto User.
     {
         /// <summary>
         /// Representa a coleção de produtos (tabela "Products") no contexto da base de dados.
