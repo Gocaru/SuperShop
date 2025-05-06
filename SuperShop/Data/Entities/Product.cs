@@ -40,5 +40,19 @@ namespace SuperShop.Data.Entities
 
         //O meu produto tb vai ter de ter uma propriedade que é o "User" (pois quero saber o utilizador que inseriu um determinado produto)
         public User User { get; set; }  //Cria uma relação de um para muitos (1 user pode ter muitos produtos, mas um produto só pode ter 1 user)
+
+        //propriedade que tem como objetivo construir e devolver o caminho completo (URL absoluto) de uma imagem, a partir do seu caminho relativo armazenado em ImageUrl.
+        public string ImageFullPath
+        {
+            get
+            {
+                if(string.IsNullOrEmpty(ImageUrl))
+                {
+                    return null;
+                }
+
+                return $"https://localhost:44393{ImageUrl.Substring(1)}";
+            }
+        }
     }
 }

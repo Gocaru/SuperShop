@@ -15,12 +15,18 @@ namespace SuperShop.Controllers.API
             _productRepository = productRepository;
         }
 
-        //Crio a action que me vai dar todos os produtos
+        ////Crio a action que me vai dar todos os produtos
+        //[HttpGet]
+        //public IActionResult GetProducts()
+        //{
+        //    return Ok(_productRepository.GetAll());  //Retorna todos os produtos do repositório
+        //                                             //O "Ok" embrulha tudo dentro de um Json
+        //}
         [HttpGet]
         public IActionResult GetProducts()
         {
-            return Ok(_productRepository.GetAll());  //Retorna todos os produtos do repositório
-                                                     //O "Ok" embrulha tudo dentro de um Json
+            return Ok(_productRepository.GetAllWithUsers());  //Retorna todos os produtos com os utilizadores que os inseriram do repositório
+                                                              //O "Ok" embrulha tudo dentro de um Json
         }
 
     }
