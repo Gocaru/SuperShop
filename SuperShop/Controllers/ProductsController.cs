@@ -29,6 +29,8 @@ namespace SuperShop.Controllers
 
         private readonly IProductRepository _productRepository;
         private readonly IUserHelper _userHelper;
+        private readonly IImageHelper _imageHelper;
+        private readonly IConverterHelper _converterHelper;
 
         //public ProductsController(IProductRepository productrepository)
         //{
@@ -37,10 +39,14 @@ namespace SuperShop.Controllers
 
         public ProductsController(
             IProductRepository productRepository,
-            IUserHelper userHelper) //Injeto o IUserHelper
+            IUserHelper userHelper,     //Injeto o IUserHelper
+            IImageHelper imageHelper,   //Injeto o IImageHelper
+            IConverterHelper converterHelper)   //Injeto o IConverterHelper
         {
             _productRepository = productRepository;
             _userHelper = userHelper;
+            _imageHelper = imageHelper;
+            _converterHelper = converterHelper;
         }
 
         //// GET: Products
@@ -184,41 +190,88 @@ namespace SuperShop.Controllers
         //    }
         //    return View(product);
         //}
+        //[HttpPost]
+        //[ValidateAntiForgeryToken]
+        //public async Task<IActionResult> Create(ProductViewModel model)
+        //{
+        //    if (ModelState.IsValid)
+        //    {
+        //        //Coloco as imagens
+        //        var path = string.Empty; //Caminho da imagem
+
+        //        if(model.ImageFile != null && model.ImageFile.Length > 0)  //Se foi carregada uma imagem
+        //        {
+        //            //Para não correr o risco de ter dois ficheiros de imagem com o mesmo nome:
+        //            var guid = Guid.NewGuid().ToString();   //Crio um objeto do tipo "Guid" (identificador único) e converto para string para o poder guardar
+        //            var file = $"{guid}.jpg";   //Converto para imagem .jpg
+
+        //            //Construo o caminho para onde vai ser gravada
+        //            path = Path.Combine(
+        //                Directory.GetCurrentDirectory(),    //Indico o sítio onde vou gravar
+        //                "wwwroot\\images\\products",        //E o caminho para a pasta respetiva
+        //                                                    //model.ImageFile.FileName);          //Vou buscar o resto do ficheiro
+        //                file);
+
+        //            using (var stream = new FileStream(path, FileMode.Create))         //Vou gravar
+        //            {
+        //                await model.ImageFile.CopyToAsync(stream);      //Aqui guarda
+        //            }
+
+        //            //Indico o caminho da Base de Dados
+        //            //path = $"~/images/products/{model.ImageFile.FileName}";
+        //            path = $"~/images/products/{file}";
+        //        }
+
+        //        //Antes de gravar para a BD vou ter de converter o ProductViewModel num Product (pois o que quero gravar na tabela é um Product)
+        //        var product = this.ToProduct(model, path);  //Vou buscar o método que vai fazer essa conversão ("ToProduct")
+
+
+        //        //ToDo: Modificar para o user que tiver logado
+        //        product.User = await _userHelper.GetUserByEmailAsync("goncalorusso@gmail.com");
+        //        await _productRepository.CreateAsync(product);
+        //        return RedirectToAction(nameof(Index));
+        //    }
+        //    return View(model);
+        //}
+
+        //[HttpPost]
+        //[ValidateAntiForgeryToken]
+        //public async Task<IActionResult> Create(ProductViewModel model)
+        //{
+        //    if (ModelState.IsValid)
+        //    {
+        //        //Coloco as imagens
+        //        var path = string.Empty; //Caminho da imagem
+
+        //        if (model.ImageFile != null && model.ImageFile.Length > 0)  //Se foi carregada uma imagem
+        //        {
+        //            path = await _imageHelper.UploadImageAsync(model.ImageFile, "products");   //Se o ficheiro existir digo para o guardar na pasta "products" utilizando o método "UploadImageAsync"
+        //        }
+
+        //        //Antes de gravar para a BD vou ter de converter o ProductViewModel num Product (pois o que quero gravar na tabela é um Product)
+        //        var product = this.ToProduct(model, path);  //Vou buscar o método que vai fazer essa conversão ("ToProduct")
+
+        //        //ToDo: Modificar para o user que tiver logado
+        //        product.User = await _userHelper.GetUserByEmailAsync("goncalorusso@gmail.com");
+        //        await _productRepository.CreateAsync(product);
+        //        return RedirectToAction(nameof(Index));
+        //    }
+        //    return View(model);
+        //}
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(ProductViewModel model)
         {
             if (ModelState.IsValid)
             {
-                //Coloco as imagens
-                var path = string.Empty; //Caminho da imagem
+                var path = string.Empty; 
 
-                if(model.ImageFile != null && model.ImageFile.Length > 0)  //Se foi carregada uma imagem
+                if (model.ImageFile != null && model.ImageFile.Length > 0)  
                 {
-                    //Para não correr o risco de ter dois ficheiros de imagem com o mesmo nome:
-                    var guid = Guid.NewGuid().ToString();   //Crio um objeto do tipo "Guid" (identificador único) e converto para string para o poder guardar
-                    var file = $"{guid}.jpg";   //Converto para imagem .jpg
-
-                    //Construo o caminho para onde vai ser gravada
-                    path = Path.Combine(
-                        Directory.GetCurrentDirectory(),    //Indico o sítio onde vou gravar
-                        "wwwroot\\images\\products",        //E o caminho para a pasta respetiva
-                                                            //model.ImageFile.FileName);          //Vou buscar o resto do ficheiro
-                        file);
-
-                    using (var stream = new FileStream(path, FileMode.Create))         //Vou gravar
-                    {
-                        await model.ImageFile.CopyToAsync(stream);      //Aqui guarda
-                    }
-
-                    //Indico o caminho da Base de Dados
-                    //path = $"~/images/products/{model.ImageFile.FileName}";
-                    path = $"~/images/products/{file}";
+                    path = await _imageHelper.UploadImageAsync(model.ImageFile, "products");   
                 }
 
-                //Antes de gravar para a BD vou ter de converter o ProductViewModel num Product (pois o que quero gravar na tabela é um Product)
-                var product = this.ToProduct(model, path);  //Vou buscar o método que vai fazer essa conversão ("ToProduct")
-
+                var product = _converterHelper.ToProduct(model, path, true);
 
                 //ToDo: Modificar para o user que tiver logado
                 product.User = await _userHelper.GetUserByEmailAsync("goncalorusso@gmail.com");
@@ -227,7 +280,7 @@ namespace SuperShop.Controllers
             }
             return View(model);
         }
-
+        
         /// <summary>
         /// Converte um objeto do tipo "ProductViewModel" num objeto "Product"
         /// </summary>
@@ -238,21 +291,21 @@ namespace SuperShop.Controllers
         /// Este método é útil para transformar os dados recebidos do formulário (ViewModel) num objeto do modelo de domínio
         /// que possa ser persistido na base de dados.
         /// </remarks>
-        private Product ToProduct(ProductViewModel model, string path)
-        {
-            return new Product
-            {
-                Id = model.Id,
-                ImageUrl = path,
-                IsAvailable = model.IsAvailable,
-                LastPurchase = model.LastPurchase,
-                LastSale = model.LastSale,
-                Name = model.Name,
-                Price = model.Price,
-                Stock = model.Stock,
-                User = model.User
-            };
-        }
+        //private Product ToProduct(ProductViewModel model, string path)
+        //{
+        //    return new Product
+        //    {
+        //        Id = model.Id,
+        //        ImageUrl = path,
+        //        IsAvailable = model.IsAvailable,
+        //        LastPurchase = model.LastPurchase,
+        //        LastSale = model.LastSale,
+        //        Name = model.Name,
+        //        Price = model.Price,
+        //        Stock = model.Stock,
+        //        User = model.User
+        //    };
+        //}
 
         //// GET: Products/Edit/5
         ///// <summary>
@@ -310,6 +363,22 @@ namespace SuperShop.Controllers
         //    }
         //    return View(product);
         //}
+        //public async Task<IActionResult> Edit(int? id)
+        //{
+        //    if (id == null)
+        //    {
+        //        return NotFound();
+        //    }
+
+        //    var product = await _productRepository.GetByIdAsync(id.Value);
+        //    if (product == null)
+        //    {
+        //        return NotFound();
+        //    }
+
+        //    var model = this.ToProductViewModel(product);
+        //    return View(model);
+        //}
 
         public async Task<IActionResult> Edit(int? id)
         {
@@ -324,7 +393,7 @@ namespace SuperShop.Controllers
                 return NotFound();
             }
 
-            var model = this.ToProductViewModel(product);
+            var model = _converterHelper.ToProductViewModel(product);
             return View(model);
         }
 
@@ -338,21 +407,21 @@ namespace SuperShop.Controllers
         /// Este método é útil quando se pretende enviar dados para uma View que depende de uma estrutura personalizada,
         /// como é o caso das operações de criação ou edição de produtos com campos adicionais ou formatação específica.
         /// </remarks>
-        private ProductViewModel ToProductViewModel(Product product)
-        {
-            return new ProductViewModel
-            {
-                Id = product.Id,
-                IsAvailable = product.IsAvailable,
-                LastPurchase = product.LastPurchase,
-                LastSale = product.LastSale,
-                ImageUrl = product.ImageUrl,
-                Name = product.Name,
-                Price = product.Price,
-                Stock = product.Stock,
-                User = product.User
-            };
-        }
+        //private ProductViewModel ToProductViewModel(Product product)
+        //{
+        //    return new ProductViewModel
+        //    {
+        //        Id = product.Id,
+        //        IsAvailable = product.IsAvailable,
+        //        LastPurchase = product.LastPurchase,
+        //        LastSale = product.LastSale,
+        //        ImageUrl = product.ImageUrl,
+        //        Name = product.Name,
+        //        Price = product.Price,
+        //        Stock = product.Stock,
+        //        User = product.User
+        //    };
+        //}
 
         //// POST: Products/Edit/5
         //// To protect from overposting attacks, enable the specific properties you want to bind to.
@@ -468,6 +537,61 @@ namespace SuperShop.Controllers
         //    }
         //    return View(product);
         //}
+        //[HttpPost]
+        //[ValidateAntiForgeryToken]
+        //public async Task<IActionResult> Edit(ProductViewModel model)
+        //{
+
+        //    if (ModelState.IsValid)
+        //    {
+        //        try
+        //        {
+        //            //Para o caso de não alterar a imagem
+        //            var path = model.ImageUrl;
+
+        //            if(model.ImageFile != null && model.ImageFile.Length > 0)
+        //            {
+        //                //Para não correr o risco de ter dois ficheiros de imagem com o mesmo nome:
+        //                var guid = Guid.NewGuid().ToString();   //Crio um objeto do tipo "Guid" (identificador único) e converto para string para o poder guardar
+        //                var file = $"{guid}.jpg";   //Converto para imagem .jpg
+
+
+        //                path = Path.Combine(
+        //                    Directory.GetCurrentDirectory(),
+        //                    "wwwroot\\images\\products",
+        //                    //model.ImageFile.FileName);
+        //                    file);
+
+        //                using(var stream = new FileStream(path, FileMode.Create))
+        //                {
+        //                    await model.ImageFile.CopyToAsync(stream);
+        //                }
+
+        //                //path = $"~/images/products/{model.ImageFile.FileName}";
+        //                path = $"~/images/products/{file}";
+        //            }
+
+        //            var product = this.ToProduct(model, path);
+
+        //            //ToDo: Modificar para o user que tiver logado
+        //            product.User = await _userHelper.GetUserByEmailAsync("goncalorusso@gmail.com"); // Garante que, ao atualizar o produto, o campo User associado ao mesmo não fica nulo e está corretamente ligado a um utilizador existente.
+        //            await _productRepository.UpdateAsync(product);   //Faço o update do produto utilizando o método "UpdateAsync()"
+        //        }
+        //        catch (DbUpdateConcurrencyException)
+        //        {
+        //            if (!await _productRepository.ExistAsync(model.Id)) //Se, utilizando o método "ExistAsync", não existe o Id do model na BD
+        //            {
+        //                return NotFound();
+        //            }
+        //            else
+        //            {
+        //                throw;
+        //            }
+        //        }
+        //        return RedirectToAction(nameof(Index));
+        //    }
+        //    return View(model);
+        //}
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(ProductViewModel model)
@@ -480,29 +604,13 @@ namespace SuperShop.Controllers
                     //Para o caso de não alterar a imagem
                     var path = model.ImageUrl;
 
-                    if(model.ImageFile != null && model.ImageFile.Length > 0)
+                    if (model.ImageFile != null && model.ImageFile.Length > 0)
                     {
-                        //Para não correr o risco de ter dois ficheiros de imagem com o mesmo nome:
-                        var guid = Guid.NewGuid().ToString();   //Crio um objeto do tipo "Guid" (identificador único) e converto para string para o poder guardar
-                        var file = $"{guid}.jpg";   //Converto para imagem .jpg
-
-
-                        path = Path.Combine(
-                            Directory.GetCurrentDirectory(),
-                            "wwwroot\\images\\products",
-                            //model.ImageFile.FileName);
-                            file);
-
-                        using(var stream = new FileStream(path, FileMode.Create))
-                        {
-                            await model.ImageFile.CopyToAsync(stream);
-                        }
-
-                        //path = $"~/images/products/{model.ImageFile.FileName}";
-                        path = $"~/images/products/{file}";
+                        path = await _imageHelper.UploadImageAsync(model.ImageFile, "products");
                     }
 
-                    var product = this.ToProduct(model, path);
+                    //var product = this.ToProduct(model, path);
+                    var product = _converterHelper.ToProduct(model, path, false);   //Coloco falso para o método que recebe saber que o Product não é novo
 
                     //ToDo: Modificar para o user que tiver logado
                     product.User = await _userHelper.GetUserByEmailAsync("goncalorusso@gmail.com"); // Garante que, ao atualizar o produto, o campo User associado ao mesmo não fica nulo e está corretamente ligado a um utilizador existente.

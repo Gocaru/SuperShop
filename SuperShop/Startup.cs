@@ -47,9 +47,12 @@ namespace SuperShop
 
             services.AddScoped<IUserHelper, UserHelper>();
 
+            services.AddScoped<IImageHelper, ImageHelper>();
+            services.AddScoped<IConverterHelper, ConverterHelper>();
+
             //services.AddScoped<IRepository, Repository>();  //Quando for preciso, vai compilar o interface do repositório e quando for necessário vai ser instanciado (injeto a classe "Repository")
             //                                                //Assim que detetar que é preciso o repositório, vai instanciá-lo
-            //                                                //Posso criar o objeto as vezes que quiser, mas ao criar um um novo objeto vai apagar o anterior
+            //                                                //Posso criar o objeto as vezes que quiser, mas ao criar um novo objeto vai apagar o anterior
             //                                                //Ao contrário do "AddSingleton", através do qual é criado um objeto que está sempre ativo
             //                                                //(quando é necessário ter o mesmo objeto durante o ciclo de vida da aplicação)
 
